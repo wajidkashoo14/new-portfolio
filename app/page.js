@@ -101,18 +101,9 @@ export default function Portfolio() {
   ];
 
   const skills = [
-    { name: "React", level: 95 },
-    { name: "Next.js", level: 90 },
-    { name: "JavaScript", level: 92 },
-    { name: "Python", level: 88 },
-    { name: "Tailwind CSS", level: 94 },
-    { name: "Redux", level: 87 },
-    { name: "SQL", level: 85 },
-    { name: "Git", level: 90 },
-    { name: "HTML/CSS", level: 96 },
-    { name: "ACS Motion Control", level: 82 },
-    { name: "Chakra UI", level: 88 },
-    { name: "Bootstrap", level: 86 }
+    "HTML", "CSS", "Sass", "Bootstrap", "Chakra UI", "JavaScript", 
+    "React", "Redux", "Tailwind CSS", "Next.js", "Ant Design", 
+    "Git", "GitHub", "Bit Bucket", "Python", "SQL", "ACS Motion Control"
   ];
 
   const education = [
@@ -391,22 +382,13 @@ export default function Portfolio() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {skills.map((skill, index) => (
               <div
                 key={index}
-                className="glass rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
+                className="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105 text-center border border-white/10"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-lg font-bold">{skill.name}</span>
-                  <span className="text-cyan-400 font-bold">{skill.level}%</span>
-                </div>
-                <div className="h-3 bg-gray-800/50 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${skill.level}%` }}
-                  />
-                </div>
+                <span className="text-base font-semibold">{skill}</span>
               </div>
             ))}
           </div>
