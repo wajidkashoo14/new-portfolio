@@ -270,7 +270,7 @@ export default function Portfolio() {
                 onClick={() => scrollToSection('contact')}
                 className="group px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105"
               >
-                Let's Connect
+                `Let's Connect`
               </button>
               <a
                 href="https://github.com/wajidkashoo14"
@@ -492,7 +492,7 @@ export default function Portfolio() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white text-3xl font-bold">
                   7.5
                 </div>
-                <h4 className="font-bold text-xl mb-2">Bachelor's CGPA</h4>
+                <h4 className="font-bold text-xl mb-2">`Bachelor's CGPA`</h4>
                 <p className="text-gray-400">Strong foundation</p>
               </div>
 
@@ -516,7 +516,7 @@ export default function Portfolio() {
               Get In Touch
             </div>
             <h2 className="text-5xl lg:text-6xl font-black mb-4">
-              <span className="bg-gradient-to-r from-pink-400 to-orange-400 gradient-text">Let's Connect</span>
+              <span className="bg-gradient-to-r from-pink-400 to-orange-400 gradient-text">`Let's Connect`</span>
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Ready to collaborate on your next project
