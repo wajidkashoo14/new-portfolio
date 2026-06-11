@@ -1,540 +1,723 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { Menu, X, Mail, Phone, Linkedin, Github, ChevronDown, Calendar, MapPin, Building, GraduationCap, Award, Code, Rocket, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  ArrowUpRight, ExternalLink, Send,
+  CheckCircle2, AlertCircle, Github,
+  Linkedin, Mail, Phone, Menu, X
+} from 'lucide-react';
 
-export default function Portfolio() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
+/* ══════════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════════ */
+const PROJECTS = [
+  {
+    name: 'Valley Green Mart',
+    label: 'E-Commerce',
+    url: 'https://www.valleygreenmart.com',
+    desc: 'Full-stack e-commerce platform for certified organic produce from Kashmir. Cart, checkout, order tracking, and an admin dashboard.',
+    tech: ['Next.js', 'Firebase', 'Tailwind'],
+    gradient: 'linear-gradient(135deg, #1a2e1a 0%, #0f3322 50%, #1a3d25 100%)',
+    accent: '#4ade80',
+  },
+  {
+    name: 'Hunt Kashmir 365',
+    label: 'Travel & Tourism',
+    url: 'https://huntkashmir.vercel.app/',
+    desc: 'Tour booking platform for Kashmir vacation packages — honeymoon, adventure, luxury. Journey planner with destination galleries.',
+    tech: ['Next.js', 'React', 'Tailwind'],
+    gradient: 'linear-gradient(135deg, #2e1a0a 0%, #3d220f 50%, #2a1a08 100%)',
+    accent: '#fb923c',
+  },
+  {
+    name: 'TMJ Connect Portal',
+    label: 'Healthcare',
+    url: 'https://tmj-provider.netlify.app/',
+    desc: 'Provider-facing portal for TMJ healthcare specialists. Streamlines patient-provider connections and clinical information.',
+    tech: ['React', 'JavaScript', 'CSS'],
+    gradient: 'linear-gradient(135deg, #0a1929 0%, #0d2137 50%, #0a1929 100%)',
+    accent: '#60a5fa',
+  },
+];
+
+const EXPERIENCES = [
+  {
+    num: '01',
+    role: 'Full Stack Developer',
+    company: 'Freelance',
+    period: 'Nov 2023 – Oct 2024',
+    type: 'Freelance',
+    bullets: [
+      'Shipped 3 production web apps across healthcare, e-commerce, and travel industries',
+      'Managed full project lifecycle: discovery, design, build, deploy, and post-launch support',
+      'Optimised Core Web Vitals and performance benchmarks across all deliverables',
+    ],
+    tech: ['Next.js', 'React', 'Firebase', 'Tailwind CSS', 'Vercel'],
+  },
+  {
+    num: '02',
+    role: 'Software Engineer',
+    company: 'Uvaska ETS Pvt. Ltd.',
+    period: 'Nov 2024 – Aug 2025',
+    type: 'Full-time',
+    bullets: [
+      'Integrated ACS Motion Control with Python-based VMOK software for precision hardware operations',
+      'Built Tkinter GUI for a 6-axis robot manipulator with forward/inverse kinematics and I/O control',
+      'Implemented emergency-stop monitoring, velocity management, and SQL-backed reporting pipelines',
+    ],
+    tech: ['Python', 'Tkinter', 'ACS Motion Control', 'SQL'],
+  },
+  {
+    num: '03',
+    role: 'Frontend Developer',
+    company: 'General Aeronautics Pvt Ltd',
+    period: 'Jan 2023 – Oct 2023',
+    type: 'Internship',
+    bullets: [
+      'Built responsive UIs for user, drone, and avionics management modules',
+      'Implemented Redux for global state and real-time data synchronisation across dashboards',
+      'Optimised API integration and delivered role-based user management features',
+    ],
+    tech: ['React', 'Redux', 'JavaScript', 'REST APIs'],
+  },
+];
+
+const SKILLS = [
+  { group: 'Frontend',     items: ['React', 'Next.js', 'JavaScript', 'TypeScript', 'HTML', 'CSS', 'Sass', 'Tailwind CSS'] },
+  { group: 'UI Libraries', items: ['Chakra UI', 'Ant Design', 'Bootstrap', 'Shadcn UI'] },
+  { group: 'State & Data', items: ['Redux', 'Context API', 'Firebase', 'SQL'] },
+  { group: 'Tools',        items: ['Git', 'GitHub', 'Bitbucket', 'Vercel', 'Netlify'] },
+  { group: 'Other',        items: ['Python', 'Tkinter', 'ACS Motion Control'] },
+];
+
+const EDUCATION = [
+  { deg: 'Master of Computer Science',   inst: 'University of Kashmir', year: '2022', gpa: '7.8' },
+  { deg: 'Bachelor of Computer Science', inst: 'University of Kashmir', year: '2018', gpa: '7.5' },
+];
+
+const NAV = [
+  { id: 'home',    label: 'Home' },
+  { id: 'work',    label: 'Work' },
+  { id: 'projects',label: 'Projects' },
+  { id: 'skills',  label: 'Skills' },
+  { id: 'contact', label: 'Contact' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════════════════════════ */
+function Cursor() {
+  const dot  = useRef(null);
+  const ring = useRef(null);
+  const pos  = useRef({ x: 0, y: 0 });
+  const cur  = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-      const sections = ['home', 'experience', 'skills', 'education', 'contact'];
-      const scrollPosition = window.scrollY + 100;
+    const onMove = e => { pos.current = { x: e.clientX, y: e.clientY }; };
+    const onEnter = () => document.body.classList.add('cur-hover');
+    const onLeave = () => document.body.classList.remove('cur-hover');
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
+    window.addEventListener('mousemove', onMove);
+    document.querySelectorAll('a,button,.proj-card').forEach(el => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
 
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    let raf;
+    const animate = () => {
+      cur.current.x += (pos.current.x - cur.current.x) * 0.14;
+      cur.current.y += (pos.current.y - cur.current.y) * 0.14;
+      if (dot.current)  dot.current.style.transform  = `translate(${pos.current.x}px,${pos.current.y}px) translate(-50%,-50%)`;
+      if (ring.current) ring.current.style.transform = `translate(${cur.current.x}px,${cur.current.y}px) translate(-50%,-50%)`;
+      raf = requestAnimationFrame(animate);
     };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    raf = requestAnimationFrame(animate);
+    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf); };
   }, []);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setIsMenuOpen(false);
-    }
-  };
+  return (
+    <>
+      <div ref={dot}  className="cur-dot"  />
+      <div ref={ring} className="cur-ring" />
+    </>
+  );
+}
 
-  const experiences = [
-    {
-      company: "Uvaska ETS Private Limited",
-      position: "Software Engineer",
-      location: "Bangalore, Karnataka",
-      duration: "Nov 2024 - Aug 2025",
-      type: "Full-time",
-      icon: <Rocket className="w-6 h-6" />,
-      color: "from-cyan-400 to-blue-500",
-      achievements: [
-        "Integrating ACS Motion Control with Python-based software VMOK",
-        "Enhancing software capabilities and hardware integration",
-        "Developed Tkinter-based GUI for a 6-axis robot manipulator with kinematics calculations",
-        "Implemented position/velocity management, I/O control, and emergency stop monitoring",
-        "Created multi-page interfaces for complex robotic systems",
-        "Integrated SQL databases for operational data management, reporting, and analysis"
-      ],
-      technologies: ["Python", "ACS Motion Control", "Tkinter", "SQL", "Robotics", "GUI Development"]
-    },
-    {
-      company: "Freelance Full Stack Developer",
-      position: "Full Stack Developer",
-      location: "Bangalore, Karnataka, India",
-      duration: "Nov 2023 - Oct 2024",
-      type: "Freelance",
-      icon: <Code className="w-6 h-6" />,
-      color: "from-purple-400 to-pink-500",
-      achievements: [
-        "Elham: Developed responsive e-commerce website for Kashmiri products (under development)",
-        "Aqion.in: Built high-performance portfolio platform using Next.js and Chakra UI",
-        "KohStudio.in: Designed portfolio website using Next.js, Chakra UI, and modular React components",
-        "Delivered multiple client projects with focus on performance and user experience"
-      ],
-      technologies: ["Next.js", "React", "Chakra UI", "JavaScript", "E-commerce", "Portfolio Development"]
-    },
-    {
-      company: "General Aeronautics Pvt Ltd",
-      position: "Frontend Developer (Intern)",
-      location: "Bangalore, Karnataka, India",
-      duration: "Jan 2023 - Oct 2023",
-      type: "Internship",
-      icon: <Zap className="w-6 h-6" />,
-      color: "from-amber-400 to-orange-500",
-      achievements: [
-        "Created responsive UIs for user, drone, and avionics modules",
-        "Leveraged Redux for state management and real-time data updates",
-        "Implemented user management features (add, delete, edit)",
-        "Collaborated with teams to deliver scalable web applications",
-        "Optimized API integration for data consistency and efficiency"
-      ],
-      technologies: ["React", "Redux", "JavaScript", "API Integration", "Responsive Design", "Team Collaboration"]
-    }
-  ];
+/* ══════════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+══════════════════════════════════════════════════════════════ */
+function ScrollProgress() {
+  useEffect(() => {
+    const bar = document.getElementById('scroll-bar');
+    const onScroll = () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (bar) bar.style.transform = `scaleX(${pct})`;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return <div id="scroll-bar" />;
+}
 
-  const skills = [
-    "HTML", "CSS", "Sass", "Bootstrap", "Chakra UI", "JavaScript", 
-    "React", "Redux", "Tailwind CSS", "Next.js", "Ant Design", 
-    "Git", "GitHub", "Bit Bucket", "Python", "SQL", "ACS Motion Control"
-  ];
+/* ══════════════════════════════════════════════════════════════
+   HOOKS
+══════════════════════════════════════════════════════════════ */
+function useSection() {
+  const [sec, setSec] = useState('home');
+  useEffect(() => {
+    const fn = () => {
+      for (const { id } of NAV) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 90) setSec(id);
+      }
+    };
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  return sec;
+}
 
-  const education = [
-    {
-      degree: "Masters of Computer Science",
-      institution: "University of Kashmir",
-      location: "Srinagar, Jammu Kashmir, India",
-      duration: "Oct 2022",
-      cgpa: "7.8 CGPA",
-      type: "Post Graduate",
-      description: "Advanced studies in computer science with focus on algorithms, software engineering, and system design."
-    },
-    {
-      degree: "Bachelor of Computer Science",
-      institution: "University of Kashmir",
-      location: "Srinagar, Jammu Kashmir, India",
-      duration: "Sep 2018",
-      cgpa: "7.5 CGPA",
-      type: "Under Graduate",
-      description: "Comprehensive foundation in computer science fundamentals, programming, and software development."
-    }
-  ];
+function useReveal() {
+  const ref = useRef(null);
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setOn(true); obs.disconnect(); }
+    }, { threshold: 0.07 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, on];
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PRIMITIVES
+══════════════════════════════════════════════════════════════ */
+function FadeUp({ children, delay = 0, className = '' }) {
+  const [ref, on] = useReveal();
+  return (
+    <div ref={ref} className={`fade-up${on ? ' in' : ''} ${className}`}
+      style={{ transitionDelay: `${delay}s` }}>
+      {children}
+    </div>
+  );
+}
+
+// Curtain-reveal line (photographer portfolio hallmark)
+function Curtain({ children, delay = 0, tag = 'div', className = '', style = {} }) {
+  const [ref, on] = useReveal();
+  const Tag = tag;
+  return (
+    <Tag ref={ref} className={`curtain ${className}`} style={style}>
+      <span className={`curtain-inner${on ? ' revealed' : ''}`}
+        style={{ animationDelay: `${delay}s` }}>
+        {children}
+      </span>
+    </Tag>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MARQUEE
+══════════════════════════════════════════════════════════════ */
+const MARQUEE_ITEMS = [
+  'React', 'Next.js', 'Python', 'Full Stack Developer',
+  'Motion Control', 'Firebase', 'Open to Work',
+  'Tailwind CSS', 'Redux', 'SQL', 'Software Engineer',
+  'React', 'Next.js', 'Python', 'Full Stack Developer',
+  'Motion Control', 'Firebase', 'Open to Work',
+  'Tailwind CSS', 'Redux', 'SQL', 'Software Engineer',
+];
+
+function Marquee() {
+  return (
+    <div className="marquee-wrap">
+      <div className="marquee-track">
+        {MARQUEE_ITEMS.map((item, i) => (
+          <span key={i} className={item === 'Open to Work' ? 'hi' : ''}>
+            {item}&nbsp;&nbsp;·&nbsp;&nbsp;
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════════════════════ */
+function Nav() {
+  const [open, setOpen] = useState(false);
+  const sec = useSection();
+  const go = id => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setOpen(false); };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes glow {
-          0%, 100% { opacity: 0.5; filter: blur(40px); }
-          50% { opacity: 0.8; filter: blur(60px); }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideRight {
-          from { opacity: 0; transform: translateX(-30px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .animate-glow { animation: glow 4s ease-in-out infinite; }
-        .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-        .glass {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .gradient-text {
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-      `}</style>
+    <header className="nav">
+      <div className="nav-inner">
+        <button className="logo" onClick={() => go('home')}>
+          wajid<span>.</span>
+        </button>
+        <nav className="nav-links">
+          {NAV.map(l => (
+            <button key={l.id} className={`nav-link${sec === l.id ? ' on' : ''}`} onClick={() => go(l.id)}>
+              {l.label}
+            </button>
+          ))}
+        </nav>
+        <a href="mailto:wajidkashoo14@gmail.com" className="nav-cta">Hire me</a>
+        <button className="nav-toggle" onClick={() => setOpen(!open)}>
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+      {open && (
+        <div className="mob-menu">
+          {NAV.map(l => (
+            <button key={l.id} className="mob-link" onClick={() => go(l.id)}>{l.label}</button>
+          ))}
+          <a href="mailto:wajidkashoo14@gmail.com" className="btn btn-gold" style={{ display: 'flex', marginTop: '0.75rem', justifyContent: 'center' }}>Hire me</a>
+        </div>
+      )}
+    </header>
+  );
+}
 
-      {/* Animated Background */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div 
-          className="absolute w-96 h-96 rounded-full bg-purple-500 animate-glow"
-          style={{
-            left: `${mousePosition.x / 20}px`,
-            top: `${mousePosition.y / 20 + scrollY / 10}px`,
-            transition: 'all 0.3s ease-out'
-          }}
-        />
-        <div 
-          className="absolute w-96 h-96 rounded-full bg-cyan-500 animate-glow"
-          style={{
-            right: `${mousePosition.x / 30}px`,
-            bottom: `${mousePosition.y / 30}px`,
-            transition: 'all 0.3s ease-out'
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
+/* ══════════════════════════════════════════════════════════════
+   HERO — photographer-style editorial layout
+══════════════════════════════════════════════════════════════ */
+function Hero() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+
+  return (
+    <section id="home" style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      justifyContent: 'center', position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Subtle radial glow */}
+      <div style={{ position: 'absolute', top: '30%', left: '10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+      {/* Vertical lines decoration */}
+      <div style={{ position: 'absolute', right: '8%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 'calc(8% + 24px)', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border-2) 30%, transparent)', opacity: 0.4, pointerEvents: 'none' }} />
+
+      <div className="wrap" style={{ position: 'relative', zIndex: 1, paddingTop: '3rem', paddingBottom: '5rem' }}>
+
+        {/* Label */}
+        <Curtain delay={0.05} tag="p" style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '2rem' }}>
+          Software Engineer · Bangalore, India
+        </Curtain>
+
+        {/* Giant serif name */}
+        <div style={{ marginBottom: '1.5rem', overflow: 'visible' }}>
+          <Curtain delay={0.15} tag="h1" style={{
+            fontFamily: 'var(--serif)', fontStyle: 'italic',
+            fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+            fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 0.95,
+            color: 'var(--text)',
+          }}>
+            Wajid
+          </Curtain>
+          <Curtain delay={0.25} tag="h1" style={{
+            fontFamily: 'var(--serif)',
+            fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+            fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 0.95,
+            color: 'var(--text)', display: 'flex', alignItems: 'baseline', gap: '.3em',
+          }}>
+            Hussain
+            <span style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Kashoo.</span>
+          </Curtain>
+        </div>
+
+        {/* Role & divider */}
+        <Curtain delay={0.35} tag="div" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.75rem' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: '.75rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-2)', whiteSpace: 'nowrap' }}>
+            Full Stack Developer
+          </span>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)', maxWidth: 260 }} />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: '.7rem', color: 'var(--text-3)', letterSpacing: '.08em' }}>
+            2023–Present
+          </span>
+        </Curtain>
+
+        {/* Bio */}
+        <div className="fade-up" style={{ opacity: mounted ? undefined : 0, transition: 'opacity .7s .45s, transform .7s .45s', transform: mounted ? 'none' : 'translateY(18px)', maxWidth: 500, marginBottom: '2.5rem' }}>
+          <p style={{ fontSize: '1rem', color: 'var(--text-2)', lineHeight: 1.8 }}>
+            I build performant web applications and hardware-integrated systems.
+            Focused on code quality, clean UX, and products people enjoy using.
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="fade-up hero-btns" style={{ opacity: mounted ? undefined : 0, transition: 'opacity .7s .55s, transform .7s .55s', transform: mounted ? 'none' : 'translateY(18px)', display: 'flex', gap: '.875rem', marginBottom: '5rem' }}>
+          <button className="btn btn-gold" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+            Get in touch <ArrowUpRight size={14} />
+          </button>
+          <a href="https://github.com/wajidkashoo14" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+            <Github size={14} /> GitHub
+          </a>
+        </div>
+
+        {/* Stats row */}
+        <div className="fade-up" style={{ opacity: mounted ? undefined : 0, transition: 'opacity .7s .65s, transform .7s .65s', transform: mounted ? 'none' : 'translateY(18px)', display: 'flex', gap: '3rem', flexWrap: 'wrap', paddingTop: '2.5rem', borderTop: '1px solid var(--border)' }}>
+          {[
+            { n: '3+',  l: 'Years\nExperience' },
+            { n: '3',   l: 'Client\nProjects' },
+            { n: '2+',  l: 'Industries\nServed' },
+            { n: 'MCS', l: 'Univ. of\nKashmir' },
+          ].map(s => (
+            <div key={s.l} style={{ minWidth: 60 }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 700, color: 'var(--text)', lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '.35rem' }}>{s.n}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: '.62rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-3)', lineHeight: 1.5, whiteSpace: 'pre-line' }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
       </div>
 
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 glass">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="text-3xl font-black">
-              <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 gradient-text">
-                WK
-              </span>
-            </div>
+      {/* Scroll indicator */}
+      <div className="fade-up" style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem', opacity: .4 }}>
+        <div style={{ width: 1, height: 48, background: 'linear-gradient(to bottom, var(--accent), transparent)', animation: 'scrollLine 2s ease-in-out infinite' }} />
+        <span style={{ fontFamily: 'var(--mono)', fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text-3)', writingMode: 'horizontal-tb' }}>Scroll</span>
+      </div>
+      <style>{`@keyframes scrollLine { 0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.15)} }`}</style>
+    </section>
+  );
+}
 
-            <div className="hidden md:flex space-x-8">
-              {['Home', 'Experience', 'Skills', 'Education', 'Contact'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
-                  className={`text-sm font-bold tracking-wider transition-all duration-300 ${
-                    activeSection === item.toLowerCase()
-                      ? 'text-cyan-400 scale-110'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-xl glass hover:bg-white/10 transition-all"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+/* ══════════════════════════════════════════════════════════════
+   WORK
+══════════════════════════════════════════════════════════════ */
+function Work() {
+  return (
+    <section id="work" className="section">
+      <div className="wrap">
+        <FadeUp>
+          <div className="sec-head">
+            <span className="sec-num">01 — Experience</span>
+            <h2 className="sec-title">Work History</h2>
+            <p className="sec-sub">Building real products across the web and hardware stack.</p>
           </div>
-        </div>
+        </FadeUp>
 
-        {isMenuOpen && (
-          <div className="md:hidden glass border-t border-white/10">
-            <div className="px-6 py-6 space-y-4">
-              {['Home', 'Experience', 'Skills', 'Education', 'Contact'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
-                  className="block w-full text-left px-4 py-3 rounded-xl text-gray-300 hover:bg-white/10 hover:text-cyan-400 transition-all font-semibold"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative pt-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
-          <div className="space-y-8">
-            <div className="animate-slide-up">
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black mb-4">
-                <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 gradient-text">
-                  Wajid Hussain Kashoo
-                </span>
-              </h1>
-              <div className="h-2 w-32 bg-gradient-to-r from-cyan-400 to-purple-400 mx-auto rounded-full" />
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-300 animate-slide-up" style={{animationDelay: '0.2s'}}>
-              Software Engineer &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Full Stack Developer</span>
-            </h2>
-
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed animate-slide-up" style={{animationDelay: '0.4s'}}>
-              Crafting cutting-edge web applications and robotic systems with precision. 
-              Specialized in React, Next.js, and advanced motion control integration.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8 animate-slide-up" style={{animationDelay: '0.6s'}}>
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="group px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105"
-              >
-                Let&apos;s Connect
-              </button>
-              <a
-                href="https://github.com/wajidkashoo14"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-10 py-5 glass rounded-2xl font-bold text-lg hover:bg-white/10 transition-all duration-300 hover:scale-105 border-2 border-purple-500/50"
-              >
-                View GitHub
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
-          <ChevronDown size={40} className="text-cyan-400" />
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section id="experience" className="py-32 px-6 lg:px-8 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-block px-6 py-2 rounded-full glass border border-purple-300/30 text-purple-400 text-sm font-semibold mb-6">
-              Work Experience
-            </div>
-            <h2 className="text-5xl lg:text-6xl font-black mb-4">
-              <span className="bg-gradient-to-r from-cyan-400 to-purple-400 gradient-text">Professional Journey</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              A track record of delivering innovative solutions across diverse industries and technologies
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 to-pink-500 hidden md:block"></div>
-            
-            <div className="space-y-12">
-              {experiences.map((exp, index) => (
-                <div key={index} className="relative">
-                  {/* Timeline dot */}
-                  <div className="absolute left-6 w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-4 border-black shadow-lg hidden md:block"></div>
-                  
-                  <div className="md:ml-20 glass rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 border border-white/10">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${exp.color} flex items-center justify-center text-white flex-shrink-0`}>
-                          {exp.icon}
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold mb-2">{exp.position}</h3>
-                          <div className="flex items-center gap-2 text-purple-400 font-semibold mb-3">
-                            <Building className="h-4 w-4" />
-                            {exp.company}
-                          </div>
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {exp.duration}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {exp.location}
-                            </div>
-                            <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold">
-                              {exp.type}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mb-6">
-                      <h4 className="font-bold text-lg mb-4">Key Achievements:</h4>
-                      <ul className="space-y-3">
-                        {exp.achievements.map((achievement, idx) => (
-                          <li key={idx} className="flex items-start gap-3 text-gray-300">
-                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                            <span className="leading-relaxed">{achievement}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="font-bold text-lg mb-4">Technologies Used:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {exp.technologies.map((tech, idx) => (
-                          <span
-                            key={idx}
-                            className="px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-300 text-sm border border-purple-500/20 hover:bg-purple-500/20 transition-colors"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+        {EXPERIENCES.map((exp, i) => (
+          <FadeUp key={i} delay={i * 0.08}>
+            <div className="exp-entry">
+              <div className="exp-num">{exp.num}</div>
+              <div>
+                <p className="exp-role">{exp.role}</p>
+                <p className="exp-company">{exp.company}</p>
+                <div className="exp-meta">
+                  <span>{exp.period}</span>
+                  <span className="exp-dot" />
+                  <span className="tag">{exp.type}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      <section id="skills" className="py-32 px-6 lg:px-8 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-block px-6 py-2 rounded-full glass border border-purple-300/30 text-purple-400 text-sm font-semibold mb-6">
-              Technical Skills
-            </div>
-            <h2 className="text-5xl lg:text-6xl font-black mb-4">
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 gradient-text">Technical Arsenal</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Proficiency across modern technologies and frameworks
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {skills.map((skill, index) => (
-              <div
-                key={index}
-                className="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105 text-center border border-white/10"
-              >
-                <span className="text-base font-semibold">{skill}</span>
+                <ul className="exp-bullets">
+                  {exp.bullets.map((b, j) => (
+                    <li key={j} className="exp-bullet">{b}</li>
+                  ))}
+                </ul>
+                <div className="exp-tech">
+                  {exp.tech.map(t => <span key={t} className="tag">{t}</span>)}
+                </div>
               </div>
-            ))}
+            </div>
+          </FadeUp>
+        ))}
+        <div className="hr" />
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROJECTS
+══════════════════════════════════════════════════════════════ */
+function ProjectCard({ p, delay }) {
+  return (
+    <FadeUp delay={delay}>
+      <a href={p.url} target="_blank" rel="noopener noreferrer" className="proj-card" style={{ display: 'block', textDecoration: 'none' }}>
+        {/* Thumb */}
+        <div className="proj-thumb">
+          <div className="proj-thumb-bg" style={{ background: p.gradient }} />
+          <div className="proj-thumb-overlay" />
+          {/* Abstract decorative element */}
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 80, height: 80, borderRadius: '50%', border: `1px solid ${p.accent}30`, opacity: .5 }} />
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 50, height: 50, borderRadius: '50%', background: `${p.accent}15`, border: `1px solid ${p.accent}40` }} />
+          <span className="proj-thumb-label" style={{ position: 'relative', zIndex: 2 }}>{p.label}</span>
+        </div>
+
+        <div className="proj-body">
+          <p className="proj-name">{p.name}</p>
+          <p className="proj-desc">{p.desc}</p>
+          <div className="proj-tech">
+            {p.tech.map(t => <span key={t} className="tag" style={{ color: p.accent, background: `${p.accent}10`, borderColor: `${p.accent}20` }}>{t}</span>)}
+          </div>
+          <div className="proj-foot">
+            <span className="proj-link">
+              Visit site <ArrowUpRight size={12} />
+            </span>
+            <ExternalLink size={13} style={{ color: 'var(--text-3)' }} />
           </div>
         </div>
-      </section>
+      </a>
+    </FadeUp>
+  );
+}
 
-      {/* Education Section */}
-      <section id="education" className="py-32 px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-block px-6 py-2 rounded-full glass border border-purple-300/30 text-purple-400 text-sm font-semibold mb-6">
-              Education
-            </div>
-            <h2 className="text-5xl lg:text-6xl font-black mb-4">
-              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 gradient-text">Academic Excellence</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Strong academic foundation with consistent performance and dedication to learning
-            </p>
+function Projects() {
+  return (
+    <section id="projects" style={{ background: 'var(--bg-2)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }} className="section">
+      <div className="wrap">
+        <FadeUp>
+          <div className="sec-head">
+            <span className="sec-num">02 — Projects</span>
+            <h2 className="sec-title">Featured Work</h2>
+            <p className="sec-sub">Real-world applications built and shipped for clients.</p>
           </div>
+        </FadeUp>
+        <div className="proj-grid">
+          {PROJECTS.map((p, i) => <ProjectCard key={i} p={p} delay={i * 0.08} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {education.map((edu, index) => (
-              <div key={index} className="glass rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 border border-white/10">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white">
-                    <GraduationCap className="h-7 w-7" />
+/* ══════════════════════════════════════════════════════════════
+   SKILLS
+══════════════════════════════════════════════════════════════ */
+function Skills() {
+  return (
+    <section id="skills" className="section">
+      <div className="wrap">
+        <FadeUp>
+          <div className="sec-head">
+            <span className="sec-num">03 — Skills</span>
+            <h2 className="sec-title">Technical Stack</h2>
+            <p className="sec-sub">Technologies I reach for when building products.</p>
+          </div>
+        </FadeUp>
+
+        {SKILLS.map((s, i) => (
+          <FadeUp key={s.group} delay={i * 0.05}>
+            <div className="skill-row">
+              <div className="skill-group">{s.group}</div>
+              <div className="skill-pills">
+                {s.items.map(item => <span key={item} className="skill-pill">{item}</span>)}
+              </div>
+            </div>
+          </FadeUp>
+        ))}
+        <div className="hr" style={{ marginTop: '.1rem' }} />
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EDUCATION
+══════════════════════════════════════════════════════════════ */
+function Education() {
+  return (
+    <section id="education" style={{ background: 'var(--bg-2)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }} className="section">
+      <div className="wrap">
+        <FadeUp>
+          <div className="sec-head">
+            <span className="sec-num">04 — Education</span>
+            <h2 className="sec-title">Academic Background</h2>
+          </div>
+        </FadeUp>
+        {EDUCATION.map((e, i) => (
+          <FadeUp key={i} delay={i * 0.08}>
+            <div className="edu-row">
+              <div>
+                <p className="edu-deg">{e.deg}</p>
+                <p className="edu-inst">{e.inst}</p>
+              </div>
+              <div className="edu-right">
+                <span className="edu-year">{e.year}</span>
+                <span className="edu-gpa">GPA {e.gpa}</span>
+              </div>
+            </div>
+          </FadeUp>
+        ))}
+        <div className="hr" />
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CONTACT FORM
+══════════════════════════════════════════════════════════════ */
+function Field({ id, label, multiline, value, onChange, error }) {
+  return (
+    <div className="field-wrap">
+      <label className="field-lbl" htmlFor={id}>{label}</label>
+      {multiline
+        ? <textarea id={id} rows={5} value={value} onChange={onChange} className={`field${error ? ' err' : ''}`} />
+        : <input   id={id} type={id === 'email' ? 'email' : 'text'} value={value} onChange={onChange} className={`field${error ? ' err' : ''}`} />
+      }
+      {error && <p className="field-err"><AlertCircle size={11} /> {error}</p>}
+    </div>
+  );
+}
+
+function ContactForm() {
+  const [f, setF]    = useState({ name: '', email: '', subject: '', message: '' });
+  const [err, setE]  = useState({});
+  const [st, setSt]  = useState('idle');
+  const set = k => e => setF(p => ({ ...p, [k]: e.target.value }));
+
+  const validate = () => {
+    const e = {};
+    if (!f.name.trim())    e.name    = 'Required';
+    if (!f.email.trim())   e.email   = 'Required';
+    else if (!/\S+@\S+\.\S+/.test(f.email)) e.email = 'Invalid email';
+    if (!f.subject.trim()) e.subject = 'Required';
+    if (!f.message.trim()) e.message = 'Required';
+    return e;
+  };
+
+  const submit = async e => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setE(errs); return; }
+    setE({}); setSt('sending');
+    await new Promise(r => setTimeout(r, 1600));
+    setSt('sent');
+  };
+
+  if (st === 'sent') {
+    return (
+      <div style={{ textAlign: 'center', padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--accent-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CheckCircle2 size={26} style={{ color: 'var(--accent)' }} />
+        </div>
+        <div>
+          <p style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '.25rem' }}>Message sent!</p>
+          <p style={{ fontSize: '.875rem', color: 'var(--text-2)' }}>I&apos;ll get back to you within 24 hours.</p>
+        </div>
+        <button onClick={() => { setSt('idle'); setF({ name:'',email:'',subject:'',message:'' }); }}
+          style={{ background: 'none', border: 'none', fontSize: '.8rem', color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', fontFamily: 'inherit' }}>
+          Send another
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="form-row">
+        <Field id="name"    label="Your name"     value={f.name}    onChange={set('name')}    error={err.name} />
+        <Field id="email"   label="Email address" value={f.email}   onChange={set('email')}   error={err.email} />
+      </div>
+      <Field id="subject" label="Subject"       value={f.subject} onChange={set('subject')} error={err.subject} />
+      <Field id="message" label="Your message"  value={f.message} onChange={set('message')} error={err.message} multiline />
+      <button type="submit" disabled={st === 'sending'} className="btn btn-gold" style={{ alignSelf: 'flex-start' }}>
+        {st === 'sending'
+          ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="spin"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeLinecap="round"/></svg>Sending…</>
+          : <><Send size={14} />Send message</>
+        }
+      </button>
+    </form>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════════════════════════ */
+const CLINKS = [
+  { Icon: Mail,     label: 'Email',    val: 'wajidkashoo14@gmail.com',  href: 'mailto:wajidkashoo14@gmail.com' },
+  { Icon: Phone,    label: 'Phone',    val: '+91 9596103894',            href: 'tel:+919596103894' },
+  { Icon: Github,   label: 'GitHub',   val: 'github.com/wajidkashoo14', href: 'https://github.com/wajidkashoo14' },
+  { Icon: Linkedin, label: 'LinkedIn', val: 'wajid-kashoo-211046208',   href: 'https://linkedin.com/in/wajid-kashoo-211046208' },
+];
+
+function Contact() {
+  return (
+    <section id="contact" className="section">
+      <div className="wrap">
+        <FadeUp>
+          <div className="sec-head">
+            <span className="sec-num">05 — Contact</span>
+            <h2 className="sec-title">Let&apos;s Build<br /><em style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--accent)' }}>Together.</em></h2>
+            <p className="sec-sub">Open to full-time roles, freelance projects, and interesting collaborations.</p>
+          </div>
+        </FadeUp>
+
+        <div className="contact-grid">
+          {/* Left */}
+          <FadeUp delay={0.05}>
+            <div>
+              {CLINKS.map((l, i) => (
+                <a key={l.label} href={l.href}
+                  target={l.href.startsWith('http') ? '_blank' : undefined}
+                  rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="contact-link"
+                  style={{ borderBottom: i < CLINKS.length - 1 ? '1px solid var(--border)' : 'none' }}
+                >
+                  <div className="contact-icon"><l.Icon size={15} style={{ color: 'var(--text-2)' }} /></div>
+                  <div style={{ minWidth: 0 }}>
+                    <p className="contact-label">{l.label}</p>
+                    <p className="contact-val">{l.val}</p>
                   </div>
-                  <span className="px-4 py-1.5 rounded-full bg-purple-500/20 text-purple-300 text-sm font-semibold">
-                    {edu.type}
-                  </span>
+                  <ArrowUpRight size={13} style={{ color: 'var(--text-3)', marginLeft: 'auto', flexShrink: 0 }} />
+                </a>
+              ))}
+
+              <div className="avail-card" style={{ marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '.375rem' }}>
+                  <span className="avail-dot" />
+                  <span style={{ fontSize: '.875rem', fontWeight: 600, color: 'var(--accent)' }}>Currently available</span>
                 </div>
-
-                <h3 className="text-2xl font-bold mb-3">{edu.degree}</h3>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-2 text-purple-400 font-semibold">
-                    <GraduationCap className="h-4 w-4" />
-                    {edu.institution}
-                  </div>
-
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    {edu.location}
-                  </div>
-
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
-                    <Calendar className="h-4 w-4" />
-                    {edu.duration}
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Award className="h-5 w-5 text-yellow-400" />
-                    <span className="font-semibold">Academic Performance</span>
-                  </div>
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-500/30">
-                    <span className="text-3xl font-bold text-purple-300">{edu.cgpa}</span>
-                  </div>
-                </div>
-
-                <p className="text-gray-400 leading-relaxed">
-                  {edu.description}
+                <p style={{ fontSize: '.8rem', color: 'var(--text-2)', lineHeight: 1.65 }}>
+                  Open to full-time and freelance work. Reply within 24 hours.
                 </p>
               </div>
-            ))}
-          </div>
-
-          {/* Academic Highlights */}
-          <div className="glass rounded-2xl p-10 border border-white/10">
-            <h3 className="text-3xl font-bold text-center mb-10">Academic Highlights</h3>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
-                  7.8
-                </div>
-                <h4 className="font-bold text-xl mb-2">Masters CGPA</h4>
-                <p className="text-gray-400">Excellent academic performance</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white text-3xl font-bold">
-                  7.5
-                </div>
-                <h4 className="font-bold text-xl mb-2">Bachelor&apos;s CGPA</h4>
-                <p className="text-gray-400">Strong foundation</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white text-3xl font-bold">
-                  CS
-                </div>
-                <h4 className="font-bold text-xl mb-2">Computer Science</h4>
-                <p className="text-gray-400">Specialized expertise</p>
-              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </FadeUp>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-32 px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-block px-6 py-2 rounded-full glass border border-purple-300/30 text-purple-400 text-sm font-semibold mb-6">
-              Get In Touch
+          {/* Right — form */}
+          <FadeUp delay={0.12}>
+            <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 14, padding: '2rem' }}>
+              <p style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '.2rem', fontSize: '.9375rem' }}>Send a message</p>
+              <p style={{ fontSize: '.8125rem', color: 'var(--text-2)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                I read every message and reply personally.
+              </p>
+              <ContactForm />
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black mb-4">
-              <span className="bg-gradient-to-r from-pink-400 to-orange-400 gradient-text">Let&apos;s Connect</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Ready to collaborate on your next project
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: <Mail size={32} />, title: "Email", value: "wajidkashoo14@gmail.com", href: "mailto:wajidkashoo14@gmail.com", color: "from-cyan-400 to-blue-500" },
-              { icon: <Phone size={32} />, title: "Phone", value: "+91 9596103894", href: "tel:+919596103894", color: "from-purple-400 to-pink-500" },
-              { icon: <Linkedin size={32} />, title: "LinkedIn", value: "View Profile", href: "https://linkedin.com/in/wajid-kashoo-211046208", color: "from-blue-400 to-cyan-500" },
-              { icon: <Github size={32} />, title: "GitHub", value: "@wajidkashoo14", href: "https://github.com/wajidkashoo14", color: "from-gray-400 to-gray-600" }
-            ].map((contact, index) => (
-              <a
-                key={index}
-                href={contact.href}
-                target={contact.href.startsWith('http') ? '_blank' : undefined}
-                rel={contact.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="group glass rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 text-center border border-white/10"
-              >
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${contact.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                  {contact.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-cyan-400">{contact.title}</h3>
-                <p className="text-gray-400 text-sm break-all">{contact.value}</p>
-              </a>
-            ))}
-          </div>
+          </FadeUp>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Footer */}
-      <footer className="glass border-t border-white/10 py-8 text-center">
-        <p className="text-gray-400">
-          © 2025 <span className="text-cyan-400 font-bold">Wajid Hussain Kashoo</span>. Crafted with passion.
-        </p>
+/* ══════════════════════════════════════════════════════════════
+   ROOT
+══════════════════════════════════════════════════════════════ */
+export default function Portfolio() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      {mounted && <Cursor />}
+      <ScrollProgress />
+      <Nav />
+      <div className="page">
+        <Hero />
+        <Marquee />
+        <Work />
+        <Projects />
+        <Skills />
+        <Education />
+        <Contact />
+      </div>
+      <footer className="footer">
+        <div className="wrap">
+          © {new Date().getFullYear()} Wajid Hussain Kashoo — Crafted with Next.js
+        </div>
       </footer>
     </div>
   );
