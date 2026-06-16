@@ -293,11 +293,11 @@ function Hero() {
       justifyContent: 'center', position: 'relative', overflow: 'hidden',
     }}>
       {/* Subtle radial glow */}
-      <div style={{ position: 'absolute', top: '30%', left: '10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div className="hero-glow" style={{ position: 'absolute', top: '30%', left: '10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       {/* Vertical lines decoration */}
-      <div style={{ position: 'absolute', right: '8%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', right: 'calc(8% + 24px)', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border-2) 30%, transparent)', opacity: 0.4, pointerEvents: 'none' }} />
+      <div className="hero-deco-line" style={{ position: 'absolute', right: '8%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent)', pointerEvents: 'none' }} />
+      <div className="hero-deco-line" style={{ position: 'absolute', right: 'calc(8% + 24px)', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, var(--border-2) 30%, transparent)', opacity: 0.4, pointerEvents: 'none' }} />
 
       <div className="wrap" style={{ position: 'relative', zIndex: 1, paddingTop: '3rem', paddingBottom: '5rem' }}>
 
@@ -357,7 +357,7 @@ function Hero() {
         </div>
 
         {/* Stats row */}
-        <div className="fade-up" style={{ opacity: mounted ? undefined : 0, transition: 'opacity .7s .65s, transform .7s .65s', transform: mounted ? 'none' : 'translateY(18px)', display: 'flex', gap: '3rem', flexWrap: 'wrap', paddingTop: '2.5rem', borderTop: '1px solid var(--border)' }}>
+        <div className="fade-up hero-stats" style={{ opacity: mounted ? undefined : 0, transition: 'opacity .7s .65s, transform .7s .65s', transform: mounted ? 'none' : 'translateY(18px)', display: 'flex', gap: '3rem', flexWrap: 'wrap', paddingTop: '2.5rem', borderTop: '1px solid var(--border)' }}>
           {[
             { n: '3+',  l: 'Years\nExperience' },
             { n: '3',   l: 'Client\nProjects' },
