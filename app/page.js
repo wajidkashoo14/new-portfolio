@@ -15,13 +15,14 @@ const GROUPS = [
       {
         num: '01',
         category: 'Healthcare',
-        status: 'In development',
+        status: 'provider.tmj-connect.com',
         name: 'TMJ Provider Portal',
         desc: 'Healthcare provider management portal with secure login, provider dashboard, appointment tracking, and patient management workflows built with React and REST APIs.',
         meta: [
           ['Role', 'Freelance full stack developer'],
           ['Stack', 'React, REST APIs, secure auth'],
           ['Focus', 'Appointment tracking and patient management workflows'],
+          ['Live', { href: 'https://provider.tmj-connect.com', label: 'provider.tmj-connect.com' }],
         ],
         img: '/work/tmj.png',
         alt: 'TMJConnect provider dashboard — patient list with pain levels and 14-day trends',
@@ -30,13 +31,14 @@ const GROUPS = [
       {
         num: '02',
         category: 'E-commerce',
-        status: 'In development',
+        status: 'valleygreenmart.com',
         name: 'Valley Green Mart',
         desc: 'Full-featured e-commerce platform for fresh organic Kashmiri produce — saffron, dry fruits, and specialities — with a product catalogue, cart, and checkout flow.',
         meta: [
           ['Role', 'Freelance full stack developer'],
           ['Stack', 'React, Tailwind CSS'],
           ['Focus', 'Catalogue, cart and checkout flow'],
+          ['Live', { href: 'https://valleygreenmart.com', label: 'valleygreenmart.com' }],
         ],
         img: '/work/valleygreenmart.png',
         alt: 'Valley Green Mart storefront — hero carousel featuring Kashmiri walnut orchards',
